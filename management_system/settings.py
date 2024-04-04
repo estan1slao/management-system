@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'phonenumber_field',
     'backend_drf',
 ]
 
@@ -174,4 +175,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 # }
 #
-# AUTH_USER_MODEL = 'backend_DRF.Account'
+AUTH_USER_MODEL = 'backend_drf.Account'
