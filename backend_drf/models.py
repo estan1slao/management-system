@@ -45,7 +45,7 @@ class Article(models.Model):
 
     title = models.CharField(max_length=256)
     authorID = models.ForeignKey('Account', on_delete=models.PROTECT)
-    creation_date = models.DateTimeField(auto_now=True)
+    creation_date = models.DateTimeField(auto_now_add=True)
     material_link = models.URLField(null=True)
     fileID = models.ForeignKey('File', on_delete=models.PROTECT, null=True)
     article = models.TextField()
@@ -56,6 +56,8 @@ class Article(models.Model):
     folderID = models.ForeignKey('Folder', on_delete=models.PROTECT)
 
     access = MultiSelectField(choices=CHOICES_ROLE, max_length=256)
+
+    changed = models.TextField(null=True, blank=True)
 
 
 class Formula(models.Model):
@@ -83,9 +85,7 @@ class Folder(models.Model):
     articles_ids = ArrayField(models.IntegerField(), blank=True, null=True)
 
 class VersionsDocuments(models.Model):
-    content = models.TextField(null=True)
     # TODO: в дальнейшем нужно распарсить данные на IDs статей,
     #  чтобы быстро найти связанные статьи в список
-    # TODO: при редактировании не забывать добавлять новый ID статьи
     articles_ids = ArrayField(models.IntegerField(), blank=True, null=True)
 

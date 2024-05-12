@@ -22,7 +22,7 @@ from django.urls import path, include
 from backend_drf.views import *
 
 router = routers.DefaultRouter()
-router.register(r'create-article', CreateArticleView)
+router.register(r'articles', ArticleViewSet, basename='article')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

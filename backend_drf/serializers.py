@@ -1,5 +1,7 @@
 from rest_framework import serializers, fields
 from .models import *
+from .decorators import access_control
+from django.utils import timezone
 
 CHOICES_ROLE = [
     ("AD", "Administrator"),
@@ -20,7 +22,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ('title', 'material_link', 'fileID', 'article',
-                  'formula_ids', 'folderID', 'access')
+                  'formula_ids', 'folderID', 'access', 'changed')
 
 
     def create(self, validated_data):
@@ -40,7 +42,6 @@ class ArticleSerializer(serializers.ModelSerializer):
             access=validated_data['access'],
         )
 
-        # Add formula_ids if provided
         if 'formula_ids' in validated_data:
             formula_ids = validated_data['formula_ids']
             for formula_id in formula_ids:
@@ -62,3 +63,62 @@ class ArticleSerializer(serializers.ModelSerializer):
         article.save()
 
         return article
+
+    def update(self, instance, validated_data):
+        user = self.context['request'].user
+
+        old_creation_date = instance.creation_date
+        new_folder = validated_data.get('folderID')
+        old_folder = instance.folderID
+
+        old_article = Article.objects.create(
+            title=instance.title,
+            authorID=instance.authorID,
+            material_link=instance.material_link,
+            fileID=instance.fileID,
+            article=instance.article,
+            state='LA',
+            versionID=instance.versionID,
+            folderID=instance.folderID,
+            access=instance.access,
+            changed=instance.changed
+        )
+        old_article.creation_date = old_creation_date
+        old_article.save()
+
+        instance.title = validated_data.get('title', instance.title)
+        instance.material_link = validated_data.get('material_link', instance.material_link)
+        instance.fileID = validated_data.get('fileID', instance.fileID)
+        instance.article = validated_data.get('article', instance.article)
+        instance.folderID = validated_data.get('folderID', instance.folderID)
+        instance.access = validated_data.get('access', instance.access)
+        instance.changed = validated_data.get('changed', None)
+        instance.authorID = user
+
+        instance.creation_date = timezone.now()
+
+        if 'formula_ids' in validated_data:
+            instance.formula_ids.clear()
+            formula_ids = validated_data['formula_ids']
+            for formula_id in formula_ids:
+                formula = Formula.objects.get(id=formula_id)
+                instance.formula_ids.add(formula)
+
+        instance.save()
+
+        instance.versionID.articles_ids.append(old_article.id)
+        instance.versionID.save()
+
+        if new_folder != old_folder:
+            if old_folder.articles_ids:
+                old_folder.articles_ids.remove(instance.id)
+                old_folder.save()
+
+            if new_folder.articles_ids is None:
+                new_folder.articles_ids = []
+            new_folder.articles_ids.append(instance.id)
+            new_folder.save()
+
+        return instance
+
+
