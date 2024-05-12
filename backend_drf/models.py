@@ -3,6 +3,7 @@ from django.db import models
 from django.conf import settings
 from phonenumber_field.modelfields import PhoneNumberField
 from multiselectfield import MultiSelectField
+from django.contrib.postgres.fields import ArrayField
 
 User = settings.AUTH_USER_MODEL
 
@@ -22,7 +23,7 @@ class Account(AbstractUser):
 
     role = models.CharField(max_length=15, choices=CHOICES_ROLE)
     phone_number = PhoneNumberField(region='RU')
-    patronymic = models.CharField(max_length=128)
+    patronymic = models.CharField(max_length=128, blank=True, null=True)
     work_pos = models.CharField(max_length=128)
 
 
@@ -79,12 +80,12 @@ class FunctionalModels(models.Model):
 
 class Folder(models.Model):
     title = models.CharField(max_length=256)
-    # TODO: нужно ли добавить аналогичный articles_ids, как в VersionsDocuments?
+    articles_ids = ArrayField(models.IntegerField(), blank=True, null=True)
 
 class VersionsDocuments(models.Model):
     content = models.TextField(null=True)
     # TODO: в дальнейшем нужно распарсить данные на IDs статей,
     #  чтобы быстро найти связанные статьи в список
     # TODO: при редактировании не забывать добавлять новый ID статьи
-    articles_ids = models.TextField(null=True)
+    articles_ids = ArrayField(models.IntegerField(), blank=True, null=True)
 

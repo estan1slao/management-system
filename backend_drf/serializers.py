@@ -47,8 +47,18 @@ class ArticleSerializer(serializers.ModelSerializer):
                 formula = Formula.objects.get(id=formula_id)
                 article.formula_ids.add(formula)
 
-        vers.save()
-        article.save()
+        if vers.articles_ids is None:
+            vers.articles_ids = []
 
+        vers.articles_ids.append(article.id)
+        vers.save()
+
+        if validated_data['folderID'].articles_ids is None:
+            validated_data['folderID'].articles_ids = []
+
+        validated_data['folderID'].articles_ids.append(article.id)
+        validated_data['folderID'].save()
+
+        article.save()
 
         return article

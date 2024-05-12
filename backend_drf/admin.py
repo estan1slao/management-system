@@ -9,15 +9,15 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'role', 'phone_number', 'patronymic', 'work_pos', 'password1', 'password2')}
+            'fields': ('username', 'email', 'role', 'phone_number', "first_name", "last_name", 'patronymic', 'work_pos', 'password1', 'password2' )}
          ),
     )
     fieldsets = (
-        (None, {'fields': ('username', 'email', 'role', 'phone_number', 'patronymic', 'work_pos')}),
+        (None, {'fields': ('username', 'email', 'role', 'phone_number',"first_name", "last_name", 'patronymic', 'work_pos')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
-    list_display = ('username', 'email', 'role', 'phone_number', 'patronymic', 'work_pos')
+    list_display = ('username', 'email', 'role', 'phone_number',"first_name", "last_name", 'patronymic', 'work_pos')
     readonly_fields = ('last_login', 'date_joined', 'is_staff', 'is_superuser')
 
 
