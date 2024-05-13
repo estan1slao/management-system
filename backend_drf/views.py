@@ -35,3 +35,16 @@ class ArticleViewSet(ViewSet):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @access_control
+    def retrieve(self, request, pk=None):
+        article = get_object_or_404(Article, pk=pk)
+        serializer = ArticleSerializer(article)
+        return Response(serializer.data)
+
+    @access_control
+    def delete(self, request, pk=None):
+        article = get_object_or_404(Article, pk=pk)
+        article.state = 'AR'  # Изменяем состояние статьи на 'AR'
+        article.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
