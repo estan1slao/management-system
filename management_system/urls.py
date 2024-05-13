@@ -39,4 +39,8 @@ urlpatterns = [
     # Папки
     path('api/folders/', FolderView.as_view(), name='folder-list'),
     path('api/folders/<int:id_folder>/', FolderView.as_view(), name='folder-detail'),
+
+    # Формулы
+    path('api/formula/', FormulaView.as_view(), name='formula-list'),
+    path('api/formula/<int:id_formula>/', FormulaView.as_view(), name='formula-detail'),
 ]

@@ -45,8 +45,7 @@ class ArticleSerializer(serializers.ModelSerializer):
         if 'formula_ids' in validated_data:
             formula_ids = validated_data['formula_ids']
             for formula_id in formula_ids:
-                formula = Formula.objects.get(id=formula_id)
-                article.formula_ids.add(formula)
+                article.formula_ids.add(formula_id.id)
 
         if vers.articles_ids is None:
             vers.articles_ids = []
@@ -101,8 +100,7 @@ class ArticleSerializer(serializers.ModelSerializer):
             instance.formula_ids.clear()
             formula_ids = validated_data['formula_ids']
             for formula_id in formula_ids:
-                formula = Formula.objects.get(id=formula_id)
-                instance.formula_ids.add(formula)
+                instance.formula_ids.add(formula_id.id)
 
         instance.save()
 
@@ -125,5 +123,10 @@ class FolderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Folder
         fields = ('id', 'title', 'articles_ids')
+
+class FormulaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Formula
+        fields = '__all__'
 
 

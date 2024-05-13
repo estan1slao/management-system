@@ -15,6 +15,8 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.exceptions import ObjectDoesNotExist
+
 
 
 class ArticleViewSet(ViewSet):
@@ -54,10 +56,17 @@ class FolderView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
-        # Получаем список всех папок
-        folders = Folder.objects.all()
-        serializer = FolderSerializer(folders, many=True)
-        return Response(serializer.data)
+        try:
+            if 'id_folder' in kwargs:
+                folder = Folder.objects.get(id=kwargs['id_folder'])
+                serializer = FolderSerializer(folder)
+            else:
+                # Получаем список всех папок
+                folders = Folder.objects.all()
+                serializer = FolderSerializer(folders, many=True)
+            return Response(serializer.data)
+        except ObjectDoesNotExist:
+            return Response({'error': 'Folder not found'}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, *args, **kwargs):
         # Создаем папку
@@ -103,3 +112,40 @@ class FolderView(APIView):
                 return Response({'message': 'There are articles in the folder. Specify in the "new_id_folder" parameter the ID of the new folder where to move incoming articles'}, status=status.HTTP_400_BAD_REQUEST)
             folder.delete()
             return Response({'message': 'Folder deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+
+class FormulaView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            if 'id_formula' in kwargs:
+                formula = Formula.objects.get(id=kwargs['id_formula'])
+                serializer = FormulaSerializer(formula)
+            else:
+                formuls = Formula.objects.all()
+                serializer = FormulaSerializer(formuls, many=True)
+            return Response(serializer.data)
+        except ObjectDoesNotExist:
+            return Response({'error': 'Formula not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request, *args, **kwargs):
+        content = request.data.get('formula')
+        formula = Formula.objects.create(formula=content)
+        serializer = FormulaSerializer(formula)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def put(self, request, id_formula, *args, **kwargs):
+        formula = Formula.objects.get(id=id_formula)
+        content = request.data.get('formula')
+        formula.formula = content
+        formula.save()
+        return Response({'message': 'Formula updated successfully'}, status=status.HTTP_200_OK)
+
+    def delete(self, request, id_formula, *args, **kwargs):
+        formula = Formula.objects.get(id=id_formula)
+        try:
+            formula.delete()
+            return Response({'message': 'Formula deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except:
+            return Response({'message': 'Before deleting a formula, you need to delete the formula from the articles!'}, status=status.HTTP_400_BAD_REQUEST)
