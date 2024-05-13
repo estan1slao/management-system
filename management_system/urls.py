@@ -21,12 +21,22 @@ from django.urls import path, include
 
 from backend_drf.views import *
 
+# Статьи
 router = routers.DefaultRouter()
 router.register(r'articles', ArticleViewSet, basename='article')
 
 urlpatterns = [
+    # Для администратора
     path('admin/', admin.site.urls),
+
+    # Авторизация
     path('api/login/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/login/token-refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/', include(router.urls))
+
+    # Роутинг статей
+    path('api/', include(router.urls)),
+
+    # Папки
+    path('api/folders/', FolderView.as_view(), name='folder-list'),
+    path('api/folders/<int:id_folder>/', FolderView.as_view(), name='folder-detail'),
 ]

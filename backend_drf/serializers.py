@@ -121,4 +121,9 @@ class ArticleSerializer(serializers.ModelSerializer):
 
         return instance
 
+class FolderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Folder
+        fields = ('id', 'title', 'articles_ids')
+
 
