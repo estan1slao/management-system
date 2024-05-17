@@ -131,21 +131,31 @@ class FormulaView(APIView):
 
     def post(self, request, *args, **kwargs):
         content = request.data.get('formula')
-        formula = Formula.objects.create(formula=content)
+        variables = request.data.get('variables', {})
+        formula = Formula.objects.create(formula=content, variables=variables)
         serializer = FormulaSerializer(formula)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def put(self, request, id_formula, *args, **kwargs):
-        formula = Formula.objects.get(id=id_formula)
-        content = request.data.get('formula')
-        formula.formula = content
-        formula.save()
-        return Response({'message': 'Formula updated successfully'}, status=status.HTTP_200_OK)
+        try:
+            formula = Formula.objects.get(id=id_formula)
+            content = request.data.get('formula')
+            if 'variables' in request.data:
+                variables = request.data.get('variables', {})
+                formula.variables = variables
+            formula.formula = content
+            formula.save()
+            serializer = FormulaSerializer(formula)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            return Response({'error': 'Formula not found'}, status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, id_formula, *args, **kwargs):
-        formula = Formula.objects.get(id=id_formula)
         try:
+            formula = Formula.objects.get(id=id_formula)
             formula.delete()
             return Response({'message': 'Formula deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
-        except:
-            return Response({'message': 'Before deleting a formula, you need to delete the formula from the articles!'}, status=status.HTTP_400_BAD_REQUEST)
+        except ObjectDoesNotExist:
+            return Response({'error': 'Formula not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)

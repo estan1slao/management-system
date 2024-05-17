@@ -4,6 +4,7 @@ from django.conf import settings
 from phonenumber_field.modelfields import PhoneNumberField
 from multiselectfield import MultiSelectField
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import JSONField
 
 User = settings.AUTH_USER_MODEL
 
@@ -62,6 +63,7 @@ class Article(models.Model):
 
 class Formula(models.Model):
     formula = models.TextField()
+    variables = models.JSONField(default=dict)
 
 
 class Comment(models.Model):
