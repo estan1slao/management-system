@@ -36,6 +36,7 @@ urlpatterns = [
     # Роутинг статей и статьи
     path('api/', include(router.urls)),
     path('api/archive-articles/', ArchiveArticlesView.as_view(), name='archive-articles'),
+    path('api/past-articles/<int:version_id>/', VersionDocumentsArticlesView.as_view(), name='version-documents-articles'),
 
     # Папки
     path('api/folders/', FolderView.as_view(), name='folder-list'),

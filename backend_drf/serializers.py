@@ -23,7 +23,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = ('title', 'material_link', 'fileID', 'article',
-                  'formula_ids', 'folderID', 'access', 'changed')
+                  'formula_ids', 'folderID', 'access', 'changed', 'versionID')
 
 
     def create(self, validated_data):
@@ -137,5 +137,11 @@ class ArchiveArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = '__all__'
+
+
+class ArticleListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
+        fields = ['id', 'changed', 'title', 'authorID', 'creation_date']
 
 

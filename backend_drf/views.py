@@ -49,6 +49,7 @@ class ArticleViewSet(ViewSet):
     def delete(self, request, pk=None):
         article = get_object_or_404(Article, pk=pk)
         article.state = 'AR'  # Изменяем состояние статьи на 'AR'
+        # TODO: прописать удаление из папки архивированной статьи
         article.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -63,6 +64,17 @@ class ArchiveArticlesView(APIView):
         accessible_articles = [article for article in articles if user_role in article.access]
 
         serializer = ArchiveArticleSerializer(accessible_articles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class VersionDocumentsArticlesView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, version_id, *args, **kwargs):
+        version_document = get_object_or_404(VersionsDocuments, id=version_id)
+        articles_ids = version_document.articles_ids
+        articles = Article.objects.filter(id__in=articles_ids)
+        serializer = ArticleListSerializer(articles, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

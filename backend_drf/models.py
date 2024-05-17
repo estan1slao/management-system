@@ -53,7 +53,7 @@ class Article(models.Model):
     state = models.CharField(max_length=15, choices=STATE_ARTICLE)
     formula_ids = models.ManyToManyField('Formula', null=True, blank=True)
 
-    versionID = models.ForeignKey('VersionsDocuments', on_delete=models.PROTECT)
+    versionID = models.ForeignKey('VersionsDocuments', on_delete=models.PROTECT, null=True, blank=True)
     folderID = models.ForeignKey('Folder', on_delete=models.PROTECT)
 
     access = MultiSelectField(choices=CHOICES_ROLE, max_length=256)
@@ -87,7 +87,5 @@ class Folder(models.Model):
     articles_ids = ArrayField(models.IntegerField(), blank=True, null=True)
 
 class VersionsDocuments(models.Model):
-    # TODO: в дальнейшем нужно распарсить данные на IDs статей,
-    #  чтобы быстро найти связанные статьи в список
     articles_ids = ArrayField(models.IntegerField(), blank=True, null=True)
 
