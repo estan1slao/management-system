@@ -33,8 +33,9 @@ urlpatterns = [
     path('api/login/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/login/token-refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    # Роутинг статей
+    # Роутинг статей и статьи
     path('api/', include(router.urls)),
+    path('api/archive-articles/', ArchiveArticlesView.as_view(), name='archive-articles'),
 
     # Папки
     path('api/folders/', FolderView.as_view(), name='folder-list'),

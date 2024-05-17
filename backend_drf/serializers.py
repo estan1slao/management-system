@@ -13,6 +13,7 @@ CHOICES_ROLE = [
     ("PL", "Planner"),
 ]
 
+
 class ArticleSerializer(serializers.ModelSerializer):
     access = serializers.ListField(
         child=serializers.ChoiceField(choices=CHOICES_ROLE),
@@ -119,14 +120,22 @@ class ArticleSerializer(serializers.ModelSerializer):
 
         return instance
 
+
 class FolderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Folder
         fields = ('id', 'title', 'articles_ids')
 
+
 class FormulaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Formula
+        fields = '__all__'
+
+
+class ArchiveArticleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article
         fields = '__all__'
 
 

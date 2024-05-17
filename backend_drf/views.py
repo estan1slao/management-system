@@ -16,6 +16,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponseForbidden
 
 
 
@@ -50,6 +51,19 @@ class ArticleViewSet(ViewSet):
         article.state = 'AR'  # Изменяем состояние статьи на 'AR'
         article.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ArchiveArticlesView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        user_role = user.role
+        articles = Article.objects.filter(state='AR')
+        accessible_articles = [article for article in articles if user_role in article.access]
+
+        serializer = ArchiveArticleSerializer(accessible_articles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class FolderView(APIView):
