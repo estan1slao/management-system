@@ -180,3 +180,11 @@ SIMPLE_JWT = {
 }
 
 AUTH_USER_MODEL = 'backend_drf.Account'
+
+
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:8080",
+    "https://iknowbase.netlify.app",
+    "https://main--iknowbase.netlify.app",
+    "https://66491691a8a7fe0008f8a321--iknowbase.netlify.app"
+]

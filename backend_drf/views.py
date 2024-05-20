@@ -48,8 +48,13 @@ class ArticleViewSet(ViewSet):
     @access_control
     def delete(self, request, pk=None):
         article = get_object_or_404(Article, pk=pk)
-        article.state = 'AR'  # Изменяем состояние статьи на 'AR'
-        # TODO: прописать удаление из папки архивированной статьи
+        article.state = 'AR'
+
+        folder = get_object_or_404(Folder, id=article.folderID.id)
+        if article.id in folder.articles_ids:
+            folder.articles_ids.remove(article.id)
+            folder.save()
+
         article.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -62,8 +67,7 @@ class ArchiveArticlesView(APIView):
         user_role = user.role
         articles = Article.objects.filter(state='AR')
         accessible_articles = [article for article in articles if user_role in article.access]
-
-        serializer = ArchiveArticleSerializer(accessible_articles, many=True)
+        serializer = ShortArticleListSerializer(accessible_articles, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -85,7 +89,7 @@ class FolderView(APIView):
         try:
             if 'id_folder' in kwargs:
                 folder = Folder.objects.get(id=kwargs['id_folder'])
-                serializer = FolderSerializer(folder)
+                serializer = FullFolderListSerializer(folder)
             else:
                 # Получаем список всех папок
                 folders = Folder.objects.all()
@@ -156,9 +160,10 @@ class FormulaView(APIView):
             return Response({'error': 'Formula not found'}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request, *args, **kwargs):
+        title = request.data.get('title')
         content = request.data.get('formula')
         variables = request.data.get('variables', {})
-        formula = Formula.objects.create(formula=content, variables=variables)
+        formula = Formula.objects.create(formula=content, variables=variables, title=title)
         serializer = FormulaSerializer(formula)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

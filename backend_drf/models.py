@@ -45,7 +45,10 @@ class Article(models.Model):
     ]
 
     title = models.CharField(max_length=256)
-    authorID = models.ForeignKey('Account', on_delete=models.PROTECT)
+
+    authorID = models.ForeignKey('Account', on_delete=models.PROTECT, related_name='articles_as_author')
+    changed_by_author = models.ForeignKey('Account', on_delete=models.PROTECT, null=True, related_name='articles_changed_by')
+
     creation_date = models.DateTimeField(auto_now_add=True)
     material_link = models.URLField(null=True)
     fileID = models.ForeignKey('File', on_delete=models.PROTECT, null=True)
@@ -62,11 +65,14 @@ class Article(models.Model):
 
 
 class Formula(models.Model):
+    title = models.CharField(max_length=256)
     formula = models.TextField()
     variables = models.JSONField(default=dict)
 
 
 class Comment(models.Model):
+    # TODO: добавить дату + CRUD
+
     content = models.CharField(max_length=1000)
     userID = models.ForeignKey('Account', on_delete=models.PROTECT)
     articleID = models.ForeignKey('Article', on_delete=models.PROTECT)
