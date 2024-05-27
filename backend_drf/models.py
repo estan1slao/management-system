@@ -57,7 +57,7 @@ class Article(models.Model):
     formula_ids = models.ManyToManyField('Formula', null=True, blank=True)
 
     versionID = models.ForeignKey('VersionsDocuments', on_delete=models.PROTECT, null=True, blank=True)
-    folderID = models.ForeignKey('Folder', on_delete=models.PROTECT)
+    folderID = models.ForeignKey('Folder', on_delete=models.PROTECT, null=True)
 
     access = MultiSelectField(choices=CHOICES_ROLE, max_length=256)
 

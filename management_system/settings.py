@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'phonenumber_field',
     'backend_drf',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [

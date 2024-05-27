@@ -14,18 +14,28 @@ CHOICES_ROLE = [
 ]
 
 
+class FormulaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Formula
+        fields = '__all__'
+
+
 class ArticleSerializer(serializers.ModelSerializer):
     access = serializers.ListField(
-        child=serializers.ChoiceField(choices=CHOICES_ROLE),
+        child=serializers.ChoiceField(choices=Article.CHOICES_ROLE),
         required=False
     )
     author = serializers.SerializerMethodField()
     changed_by_author = serializers.SerializerMethodField()
+    formula_ids = FormulaSerializer(many=True, read_only=True)
+    write_only_formula_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Formula.objects.all(), many=True, write_only=True, required=False
+    )
 
     class Meta:
         model = Article
         fields = ('id', 'title', 'creation_date', 'material_link', 'fileID', 'article', 'author', 'changed_by_author',
-                  'formula_ids', 'folderID', 'access', 'changed', 'versionID')
+                  'formula_ids', 'write_only_formula_ids', 'folderID', 'access', 'changed', 'versionID')
         extra_kwargs = {
             'title': {'required': False},
             'article': {'required': False},
@@ -45,6 +55,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
 
+        formula_ids = validated_data.pop('write_only_formula_ids', [])
         vers = VersionsDocuments.objects.create()
 
         article = Article.objects.create(
@@ -59,10 +70,8 @@ class ArticleSerializer(serializers.ModelSerializer):
             access=validated_data['access'],
         )
 
-        if 'formula_ids' in validated_data:
-            formula_ids = validated_data['formula_ids']
-            for formula_id in formula_ids:
-                article.formula_ids.add(formula_id.id)
+        for formula_id in formula_ids:
+            article.formula_ids.add(formula_id)
 
         if vers.articles_ids is None:
             vers.articles_ids = []
@@ -83,8 +92,9 @@ class ArticleSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         user = self.context['request'].user
 
+        # Сохранение старых значений
         old_creation_date = instance.creation_date
-        new_folder = validated_data.get('folderID')
+        new_folder = validated_data.get('folderID', instance.folderID)
         old_folder = instance.folderID
 
         old_article = Article.objects.create(
@@ -95,37 +105,38 @@ class ArticleSerializer(serializers.ModelSerializer):
             article=instance.article,
             state='LA',
             versionID=instance.versionID,
-            folderID=instance.folderID,
             access=instance.access,
             changed=instance.changed
         )
         old_article.creation_date = old_creation_date
         old_article.save()
 
+        for formula in instance.formula_ids.all():
+            old_article.formula_ids.add(formula)
+
         instance.title = validated_data.get('title', instance.title)
         instance.material_link = validated_data.get('material_link', instance.material_link)
         instance.fileID = validated_data.get('fileID', instance.fileID)
         instance.article = validated_data.get('article', instance.article)
-        instance.folderID = validated_data.get('folderID', instance.folderID)
+        instance.folderID = new_folder
         instance.access = validated_data.get('access', instance.access)
-        instance.changed = validated_data.get('changed', None)
+        instance.changed = validated_data.get('changed', instance.changed)
         instance.changed_by_author = user
-
         instance.creation_date = timezone.now()
 
-        if 'formula_ids' in validated_data:
+        if 'write_only_formula_ids' in validated_data:
             instance.formula_ids.clear()
-            formula_ids = validated_data['formula_ids']
-            for formula_id in formula_ids:
-                instance.formula_ids.add(formula_id.id)
+            new_formulas = validated_data.pop('write_only_formula_ids')
+            for formula in new_formulas:
+                instance.formula_ids.add(formula)
 
         instance.save()
 
         instance.versionID.articles_ids.append(old_article.id)
         instance.versionID.save()
 
-        if new_folder != old_folder and new_folder is not None:
-            if old_folder.articles_ids:
+        if new_folder != old_folder:
+            if old_folder and old_folder.articles_ids:
                 old_folder.articles_ids.remove(instance.id)
                 old_folder.save()
 
@@ -154,12 +165,6 @@ class FullFolderListSerializer(serializers.ModelSerializer):
         article_ids = obj.articles_ids if obj.articles_ids else []
         articles = Article.objects.filter(id__in=article_ids)
         return ShortArticleListSerializer(articles, many=True).data
-
-
-class FormulaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Formula
-        fields = '__all__'
 
 
 class ArticleListSerializer(serializers.ModelSerializer):

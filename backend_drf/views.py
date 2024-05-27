@@ -19,7 +19,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseForbidden
 
 
-
 class ArticleViewSet(ViewSet):
     permission_classes = (IsAuthenticated,)
 
@@ -54,6 +53,8 @@ class ArticleViewSet(ViewSet):
         if article.id in folder.articles_ids:
             folder.articles_ids.remove(article.id)
             folder.save()
+
+        article.folderID = None
 
         article.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -118,23 +119,24 @@ class FolderView(APIView):
         folder = Folder.objects.get(id=id_folder)
         id_new_folder = request.data.get('new_id_folder')
 
-        new_folder = Folder.objects.get(id=id_new_folder)
-        if new_folder is not None:
-            for article in folder.articles_ids:
-                if new_folder.articles_ids is None:
-                    new_folder.articles_ids = []
-                new_folder.articles_ids.append(article)
+        if id_new_folder is not None:
+            new_folder = Folder.objects.get(id=id_new_folder)
+            if new_folder is not None:
+                for article in folder.articles_ids:
+                    if new_folder.articles_ids is None:
+                        new_folder.articles_ids = []
+                    new_folder.articles_ids.append(article)
 
-                obj_article = Article.objects.get(id=article)
-                obj_article.folderID = new_folder
-                obj_article.save()
+                    obj_article = Article.objects.get(id=article)
+                    obj_article.folderID = new_folder
+                    obj_article.save()
 
-            new_folder.save()
-            for article in Article.objects.filter(folderID=folder):
-                article.folderID = new_folder
-                article.save()
-            folder.delete()
-            return Response({'message': 'Folder deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+                new_folder.save()
+                for article in Article.objects.filter(folderID=folder):
+                    article.folderID = new_folder
+                    article.save()
+                folder.delete()
+                return Response({'message': 'Folder deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         else:
             if folder.articles_ids is None:
                 folder.articles_ids = []
@@ -170,11 +172,19 @@ class FormulaView(APIView):
     def put(self, request, id_formula, *args, **kwargs):
         try:
             formula = Formula.objects.get(id=id_formula)
-            content = request.data.get('formula')
+
+            content = request.data.get('formula', None)
+            if content is not None:
+                formula.formula = content
+
             if 'variables' in request.data:
                 variables = request.data.get('variables', {})
                 formula.variables = variables
-            formula.formula = content
+
+            title = request.data.get('title', None)
+            if title is not None:
+                formula.title = title
+
             formula.save()
             serializer = FormulaSerializer(formula)
             return Response(serializer.data, status=status.HTTP_200_OK)
