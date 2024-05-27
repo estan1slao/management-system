@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -23,9 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-han828xb-wz%#sfbizhak686ab0y1fpf*u%$_19-@)sqmwcca0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://management-system-production.up.railway.app']
 
 
 # Application definition
@@ -46,6 +49,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -79,6 +83,7 @@ WSGI_APPLICATION = 'management_system.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -89,6 +94,9 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+if not DEBUG:
+    DATABASES['default'] = dj_database_url.parse('postgresql://postgres:KUZTCnNPGnNFROIFklqJgtHUCCCQgfmb@monorail.proxy.rlwy.net:35095/railway')
 
 
 # Password validation
@@ -189,3 +197,6 @@ CORS_ORIGIN_WHITELIST = [
     "https://main--iknowbase.netlify.app",
     "https://66491691a8a7fe0008f8a321--iknowbase.netlify.app"
 ]
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
