@@ -190,5 +190,11 @@ class ShortArticleListSerializer(serializers.ModelSerializer):
         return f"{account.last_name} {account.first_name}"
 
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ('id', 'first_name', 'last_name', 'patronymic', 'is_staff', 'role', 'work_pos')
+
+
 
 

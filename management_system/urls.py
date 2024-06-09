@@ -56,6 +56,9 @@ urlpatterns = [
     path('api/login/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/login/token-refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
+    # Профиль
+    path('api/me/profile/', getProfile, name='profile'),
+
     # Роутинг статей и статьи
     path('api/', include(router.urls)),
     path('api/archive-articles/', ArchiveArticlesView.as_view(), name='archive-articles'),
