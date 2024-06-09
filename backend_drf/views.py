@@ -18,6 +18,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseForbidden
+from django.http import JsonResponse
 
 
 class ArticleViewSet(ViewSet):
@@ -207,3 +208,33 @@ def getProfile(request):
     user = request.user
     serializer = ProfileSerializer(user, many=False)
     return Response(serializer.data)
+
+
+def search_articles(request, title):
+    # Переводим название документа в нижний регистр
+    query = title.lower()
+
+    # Поиск статей по названию с учетом регистра и состоянию
+    articles = Article.objects.filter(title__icontains=query, state="AC")
+
+    # Преобразование результатов в список словарей
+    articles_list = []
+    for article in articles:
+        articles_list.append({
+            'id': article.id,
+            'title': article.title,
+            'authorID': article.authorID.id,
+            'changed_by_author': article.changed_by_author.id if article.changed_by_author else None,
+            'creation_date': article.creation_date,
+            'material_link': article.material_link,
+            'fileID': article.fileID.id if article.fileID else None,
+            'article': article.article,
+            'state': article.state,
+            'formula_ids': [formula.id for formula in article.formula_ids.all()],
+            'versionID': article.versionID.id if article.versionID else None,
+            'folderID': article.folderID.id if article.folderID else None,
+            'access': article.access,
+            'changed': article.changed
+        })
+
+    return JsonResponse(articles_list, safe=False)

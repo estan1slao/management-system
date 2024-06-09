@@ -71,4 +71,7 @@ urlpatterns = [
     # Формулы
     path('api/formula/', FormulaView.as_view(), name='formula-list'),
     path('api/formula/<int:id_formula>/', FormulaView.as_view(), name='formula-detail'),
+
+    # Поиск по статьям
+    path('api/search/<str:title>/', search_articles, name='search_articles'),
 ]
