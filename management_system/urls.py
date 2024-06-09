@@ -74,4 +74,7 @@ urlpatterns = [
 
     # Поиск по статьям
     path('api/search/<str:title>/', search_articles, name='search_articles'),
+
+    # Информация по сотрудникам
+    path('api/employee-profiles/', ProfileAPIView.as_view(), name='profile-list'),
 ]

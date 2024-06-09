@@ -238,3 +238,12 @@ def search_articles(request, title):
         })
 
     return JsonResponse(articles_list, safe=False)
+
+
+class ProfileAPIView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        profiles = Account.objects.all()
+        serializer = ProfileSerializer(profiles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
