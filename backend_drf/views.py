@@ -247,3 +247,21 @@ class ProfileAPIView(APIView):
         profiles = Account.objects.all()
         serializer = ProfileSerializer(profiles, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RestoreArticleAPIView(APIView):
+    @access_control
+    def post(self, request, pk):
+        new_folder_id = request.data.get('folderID')
+        new_folder = get_object_or_404(Folder, id=new_folder_id)
+
+        article = get_object_or_404(Article, pk=pk)
+        article.folderID = new_folder
+        article.state = 'AC'
+        article.save()
+
+        if pk not in new_folder.articles_ids:
+            new_folder.articles_ids.append(pk)
+            new_folder.save()
+
+        return Response(status=status.HTTP_200_OK)

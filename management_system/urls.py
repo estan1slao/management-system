@@ -63,6 +63,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/archive-articles/', ArchiveArticlesView.as_view(), name='archive-articles'),
     path('api/past-articles/<int:version_id>/', VersionDocumentsArticlesView.as_view(), name='version-documents-articles'),
+    path('api/restore-article/<int:pk>/', RestoreArticleAPIView.as_view(), name='restore-article'),
 
     # Папки
     path('api/folders/', FolderView.as_view(), name='folder-list'),
