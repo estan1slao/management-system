@@ -248,3 +248,44 @@ class RestoreArticleAPIView(APIView):
             new_folder.save()
 
         return Response(status=status.HTTP_200_OK)
+
+
+class CommentListCreateView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, article_id):
+        comments = Comment.objects.filter(articleID=article_id)
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, article_id):
+        article = get_object_or_404(Article, id=article_id)
+        user = request.user
+
+        if user.role not in article.access:
+            return Response({"error": "You do not have permission to comment on this article."},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        data = request.data.copy()
+        data['articleID'] = article_id
+        data['userID'] = user.id
+        serializer = CommentCreateSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommentDeleteView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def delete(self, request, comment_id):
+        comment = get_object_or_404(Comment, id=comment_id)
+        user = request.user
+
+        if comment.userID != user:
+            return Response({"error": "You do not have permission to delete this comment."},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

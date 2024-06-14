@@ -71,11 +71,10 @@ class Formula(models.Model):
 
 
 class Comment(models.Model):
-    # TODO: добавить дату + CRUD
-
     content = models.CharField(max_length=1000)
     userID = models.ForeignKey('Account', on_delete=models.PROTECT)
     articleID = models.ForeignKey('Article', on_delete=models.PROTECT)
+    creation_date = models.DateTimeField(auto_now_add=True)
 
 
 class File(models.Model):
@@ -91,6 +90,7 @@ class FunctionalModels(models.Model):
 class Folder(models.Model):
     title = models.CharField(max_length=256)
     articles_ids = ArrayField(models.IntegerField(), blank=True, null=True)
+
 
 class VersionsDocuments(models.Model):
     articles_ids = ArrayField(models.IntegerField(), blank=True, null=True)

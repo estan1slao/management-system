@@ -196,5 +196,20 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'first_name', 'last_name', 'patronymic', 'is_staff', 'role', 'work_pos')
 
 
+class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
 
+    class Meta:
+        model = Comment
+        fields = ['id', 'content', 'user', 'creation_date']
+
+    def get_user(self, obj):
+        account = obj.userID
+        return f"{account.last_name} {account.first_name}"
+
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['content', 'userID', 'articleID']
 

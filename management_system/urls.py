@@ -78,4 +78,8 @@ urlpatterns = [
 
     # Информация по сотрудникам
     path('api/employee-profiles/', ProfileAPIView.as_view(), name='profile-list'),
+
+    # Комментирование
+    path('articles/<int:article_id>/comments/', CommentListCreateView.as_view(), name='comment_list_create'),
+    path('comments/<int:comment_id>/', CommentDeleteView.as_view(), name='comment_delete'),
 ]
