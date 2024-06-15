@@ -203,7 +203,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ['id', 'content', 'user', 'creation_date']
+        fields = ['id', 'content', 'user', 'creation_date', 'userID']
 
     def get_user(self, obj):
         account = obj.userID
