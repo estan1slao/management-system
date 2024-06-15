@@ -1,3 +1,5 @@
+import pytz
+from datetime import datetime
 from rest_framework import serializers, fields
 from .models import *
 from .decorators import access_control
@@ -209,7 +211,18 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    creation_date = serializers.SerializerMethodField()
+
     class Meta:
         model = Comment
-        fields = ['content', 'userID', 'articleID']
+        fields = ['id', 'content', 'userID', 'articleID', 'user', 'creation_date']
+
+    def get_user(self, obj):
+        account = obj.userID
+        return f"{account.last_name} {account.first_name}"
+
+    def get_creation_date(self, obj):
+        local_tz = pytz.timezone('Asia/Yekaterinburg')
+        return datetime.now(local_tz)
 
