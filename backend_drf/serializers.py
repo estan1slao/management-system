@@ -177,7 +177,10 @@ class ArticleListSerializer(serializers.ModelSerializer):
         fields = ['id', 'changed', 'title', 'author', 'creation_date']
 
     def get_author(self, obj):
-        account = obj.authorID
+        account = obj.changed_by_author
+        account_autor = obj.authorID
+        if account is None:
+            return f"{account_autor.last_name} {account_autor.first_name}"
         return f"{account.last_name} {account.first_name}"
 
 
